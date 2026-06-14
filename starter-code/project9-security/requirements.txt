@@ -1,0 +1,63 @@
+# ============================================================
+# Python 依赖清单 - 智能体工程师培养计划 项目 9
+# 用途：定义项目运行所需的所有 Python 包
+# 安装：pip install -r requirements.txt
+# ============================================================
+
+# =========== 核心框架 ============
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+pydantic==2.5.0
+pydantic-settings==2.1.0
+
+# =========== LLM SDK ============
+openai==1.6.1
+anthropic==0.8.1
+
+# =========== 安全 ============
+# 输入/输出过滤
+bleach==6.1.0
+tiktoken==0.5.2
+
+# JWT 验证
+pyjwt==2.8.0
+python-jose[cryptography]==3.3.0
+
+# 密码学
+cryptography==42.0.0
+
+# =========== 数据库 ============
+sqlalchemy==2.0.23
+sqlite3  # 内置，无需安装
+
+# =========== 监控 ============
+prometheus-client==0.19.0
+langsmith==0.1.22
+
+# =========== 日志 ============
+structlog==23.2.0
+
+# =========== 工具 ============
+python-dotenv==1.0.0
+requests==2.31.0
+pyyaml==6.0.1
+python-multipart==0.0.6
+
+# =========== 测试 ============
+pytest==7.4.3
+pytest-cov==4.1.0
+pytest-asyncio==0.21.1
+
+# =========== 代码质量 ============
+flake8==6.1.0
+black==23.12.0
+isort==5.13.2
+
+# =========== 评估 ============
+numpy==1.26.2
+pandas==2.1.4
+
+# =========== 可选：LangChain ============
+# langchain==0.0.340
+# langchain-openai==0.0.2
+# langchain-anthropic==0.0.1

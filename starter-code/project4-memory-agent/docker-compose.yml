@@ -1,0 +1,59 @@
+version: "3.8"
+
+services:
+  # Redis 服务 - 存储短期记忆
+  redis:
+    image: redis:7.2-alpine
+    container_name: memory-agent-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+
+  # Chroma 向量数据库 - 存储长期记忆
+  chroma:
+    image: chromadb/chroma:latest
+    container_name: memory-agent-chroma
+    ports:
+      - "8000:8000"
+    volumes:
+      - chroma_data:/chroma/.chroma
+    environment:
+      - IS_PERSISTENT=TRUE
+      - PERSIST_PATH=/chroma/.chroma
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/heartbeat"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # （可选）Redis Insight - Redis 可视化管理工具
+  redis-insight:
+    image: redislabs/redisinsight:latest
+    container_name: memory-agent-redis-insight
+    ports:
+      - "8001:8001"
+    volumes:
+      - redis_insight_data:/db
+    environment:
+      - REDISINSIGHT_HOST=0.0.0.0
+      - REDISINSIGHT_LISTEN_PORT=8001
+    restart: unless-stopped
+    profiles:
+      - tools  # 默认不启动，需 docker-compose --profile tools up
+
+volumes:
+  redis_data:
+    driver: local
+  chroma_data:
+    driver: local
+  redis_insight_data:
+    driver: local

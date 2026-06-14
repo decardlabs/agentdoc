@@ -1,0 +1,117 @@
+# ============================================================
+# Docker Compose 安全测试环境 - 项目 9
+# 用途：启动安全测试环境（Agent + 安全过滤 + 评估）
+# ============================================================
+
+version: "3.8"
+
+services:
+  # =========== Agent 服务 ============
+  agent:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: secure-agent:v1.0
+    container_name: secure-agent-app
+    restart: unless-stopped
+    ports:
+      - "${AGENT_PORT:-8000}:8000"
+    env_file:
+      - .env
+    environment:
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    volumes:
+      - ./src:/app/src
+      - ./data:/app/data
+      - ./logs:/app/logs
+    networks:
+      - security-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    logging:
+      driver: json-file
+      options:
+        max-size: "50m"
+        max-file: "5"
+
+  # =========== Redis（缓存） ============
+  redis:
+    image: redis:7-alpine
+    container_name: secure-agent-redis
+    restart: unless-stopped
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis-data:/data
+    command: >
+      redis-server
+      --appendonly yes
+      --maxmemory 128mb
+      --maxmemory-policy allkeys-lru
+    networks:
+      - security-network
+    logging:
+      driver: json-file
+      options:
+        max-size: "20m"
+        max-file: "3"
+
+  # =========== 测试运行器 ============
+  test-runner:
+    build:
+      context: .
+      dockerfile: Dockerfile.test
+    image: secure-agent-test:v1.0
+    container_name: secure-agent-test
+    restart: "no"
+    env_file:
+      - .env
+    environment:
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    volumes:
+      - ./src:/app/src
+      - ./data:/app/data
+      - ./tests:/app/tests
+      - ./logs:/app/logs
+      - ./reports:/app/reports
+    networks:
+      - security-network
+    depends_on:
+      - agent
+    profiles:
+      - test  # 仅在测试 profile 下启动
+
+  # =========== Prometheus（监控） ============
+  prometheus:
+    image: prom/prometheus:v2.50.0
+    container_name: secure-agent-prometheus
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus:/etc/prometheus
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.retention.time=7d'
+    networks:
+      - security-network
+    profiles:
+      - monitoring  # 仅在监控 profile 下启动
+
+volumes:
+  redis-data:
+  prometheus-data:
+
+networks:
+  security-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.29.0.0/16

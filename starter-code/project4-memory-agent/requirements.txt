@@ -1,0 +1,21 @@
+# ============ 核心框架 ============
+langchain>=0.2.0
+langchain-openai>=0.1.0
+langgraph>=0.0.40
+langchain-chroma>=0.1.0
+
+# ============ 记忆存储 ============
+redis>=5.0.0
+chromadb>=0.4.0
+
+# ============ API 服务 ============
+fastapi>=0.110.0
+uvicorn[standard]>=0.29.0
+pydantic>=2.0.0
+
+# ============ 环境变量与工具 ============
+python-dotenv>=1.0.0
+requests>=2.31.0
+
+# ============ 日志与监控 ============
+loguru>=0.7.0

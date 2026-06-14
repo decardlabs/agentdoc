@@ -1,0 +1,46 @@
+# ============================================================
+# Python 依赖清单 - 智能体工程师培养计划 项目 8
+# 用途：定义项目运行所需的所有 Python 包
+# 安装：pip install -r requirements.txt
+# ============================================================
+
+# ============ 核心框架 ============
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+pydantic==2.5.0
+pydantic-settings==2.1.0
+
+# ============ 监控 ============
+prometheus-client==0.19.0
+prometheus-fastapi-instrumentator==6.1.0
+langsmith==0.1.22
+
+# ============ 数据库 ============
+sqlalchemy==2.0.23
+sqlite3  # 内置，无需安装
+
+# ============ 日志 ============
+structlog==23.2.0
+
+# ============ 工具 ============
+python-dotenv==1.0.0
+requests==2.31.0
+pyyaml==6.0.1
+
+# ============ 数据分析和计算 ============
+numpy==1.26.2
+pandas==2.1.4
+
+# ============ 测试 ============
+pytest==7.4.3
+pytest-cov==4.1.0
+pytest-asyncio==0.21.1
+
+# ============ 代码质量 ============
+flake8==6.1.0
+black==23.12.0
+
+# ============ 可选：OpenTelemetry ============
+# opentelemetry-api==1.22.0
+# opentelemetry-sdk==1.22.0
+# opentelemetry-exporter-otlp==1.22.0

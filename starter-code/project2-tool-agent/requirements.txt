@@ -1,0 +1,26 @@
+# 工具调用 Agent - 依赖清单
+
+# OpenAI API
+openai>=1.10.0
+
+# LangChain (可选，用于对比)
+langchain>=0.1.0
+langchain-openai>=0.0.5
+
+# LangGraph (推荐)
+langgraph>=0.0.30
+
+# 环境变量管理
+python-dotenv>=1.0.0
+
+# HTTP 请求（天气查询）
+requests>=2.31.0
+
+# 工具函数
+pydantic>=2.5.0
+
+# 日志
+loguru>=0.7.0
+
+# 可选：numexpr（计算器优化）
+# numexpr>=2.8.0

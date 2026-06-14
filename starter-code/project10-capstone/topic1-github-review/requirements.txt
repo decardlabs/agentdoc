@@ -1,0 +1,59 @@
+# 核心框架
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+pydantic==2.5.0
+pydantic-settings==2.1.0
+
+# LLM SDK
+openai==1.6.0
+anthropic==0.8.0
+
+# GitHub API
+aiohttp==3.9.1
+PyGithub==2.1.1
+
+# 数据库
+redis==5.0.1
+sqlalchemy==2.0.23
+aiosqlite==0.19.0
+
+# 监控
+prometheus-client==0.19.0
+opentelemetry-api==1.21.0
+opentelemetry-sdk==1.21.0
+
+# 日志
+loguru==0.7.2
+python-json-logger==2.0.7
+
+# 工具库
+python-dotenv==1.0.0
+pyyaml==6.0.1
+aiofiles==23.2.1
+httpx==0.25.1
+requests==2.31.0
+
+# Git 操作
+gitpython==3.1.40
+
+# 数据处理
+pandas==2.1.4
+numpy==1.26.2
+
+# 测试
+pytest==7.4.3
+pytest-cov==4.1.0
+pytest-asyncio==0.21.1
+
+# 代码质量
+flake8==6.1.0
+black==23.12.0
+isort==5.13.2
+
+# 安全
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+
+# 工具调用
+langchain==0.0.340
+langchain-community==0.0.19

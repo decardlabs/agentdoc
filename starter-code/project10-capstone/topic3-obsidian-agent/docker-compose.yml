@@ -1,0 +1,103 @@
+version: "3.8"
+
+services:
+  # Obsidian 知识助手服务
+  knowledge-agent:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: obsidian-knowledge-agent:v1.0
+    container_name: obsidian-knowledge-agent
+    restart: unless-stopped
+    ports:
+      - "${APP_PORT:-8000}:8000"
+    env_file:
+      - .env
+    environment:
+      - OBSIDIAN_VAULT_PATH=/vault
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - LLM_MODEL=${LLM_MODEL:-gpt-4o-mini}
+    volumes:
+      - ${OBSIDIAN_VAULT_PATH:-./vault}:/vault:ro
+      - ./logs:/app/logs
+      - ./data:/app/data
+    networks:
+      - knowledge-network
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    logging:
+      driver: json-file
+      options:
+        max-size: "50m"
+        max-file: "5"
+
+  # Chroma 向量数据库（可选，用于语义搜索）
+  chroma:
+    image: chromadb/chroma:latest
+    container_name: obsidian-chroma
+    restart: unless-stopped
+    ports:
+      - "18000:8000"
+    volumes:
+      - chroma-data:/chroma/chroma
+    environment:
+      - IS_PERSISTENT=TRUE
+      - PERSIST_PATH=/chroma/chroma
+    networks:
+      - knowledge-network
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Redis 缓存
+  redis:
+    image: redis:7-alpine
+    container_name: knowledge-redis
+    restart: unless-stopped
+    ports:
+      - "16379:6379"
+    command: >
+      redis-server
+      --maxmemory 256mb
+      --maxmemory-policy allkeys-lru
+      --appendonly yes
+    volumes:
+      - redis-data:/data
+    networks:
+      - knowledge-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  chroma-data:
+  redis-data:
+
+networks:
+  knowledge-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.31.0.0/16

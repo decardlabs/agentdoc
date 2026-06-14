@@ -1,0 +1,85 @@
+# ============================================================
+# .dockerignore - Docker 构建上下文忽略文件
+# 用途：排除不需要的文件，减小构建上下文大小，加速构建
+# ============================================================
+
+# ============ Git ============
+.git
+.gitignore
+.github
+
+# ============ Python 缓存 ============
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+.pytest_cache
+.coverage
+htmlcov
+.mypy_cache
+
+# ============ 虚拟环境 ============
+venv/
+.venv/
+env/
+ENV/
+
+# ============ IDE ============
+.vscode/
+.idea/
+*.swp
+*.swo
+*.bak
+
+# ============ 日志和临时文件 ============
+*.log
+logs/
+tmp/
+temp/
+*.tmp
+
+# ============ 文档 ============
+docs/
+*.md
+LICENSE
+CHANGELOG.md
+
+# ============ 测试 ============
+tests/
+test_*.py
+*_test.py
+.pytest_cache/
+
+# ============ 环境变量（包含敏感信息，绝对不能进镜像） ============
+.env
+.env.local
+.env.production
+.env.development
+
+# ============ Docker 自身 ============
+docker-compose*.yml
+Dockerfile*
+docker-compose.override.yml
+
+# ============ OS / 数据 ============
+.DS_Store
+Thumbs.db
+node_modules/
+data/
+*.csv
+*.xlsx
+*.json.bak
+
+# ============ 构建产物 ============
+dist/
+build/
+*.egg-info/
+.eggs/
+
+# ============ 其他 ============
+*.tar.gz
+*.zip
+.coverage.*
+.pylintrc
+.flake8

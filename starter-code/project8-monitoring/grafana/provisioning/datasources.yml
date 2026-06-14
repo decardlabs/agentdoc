@@ -1,0 +1,48 @@
+# ============================================================
+# Grafana 数据源配置 - 智能体工程师培养计划 项目 8
+# 用途：配置 Grafana 数据源（Provisioning）
+# ============================================================
+
+# ============ Prometheus 数据源 ============
+apiVersion: 1
+
+datassources:
+  # ---------- Prometheus ----------
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    url: http://prometheus:9090
+    isDefault: true
+    editable: true
+    jsonData:
+      timeInterval: 5s
+      queryTimeout: 60s
+      httpMethod: POST
+    version: 1
+
+  # ---------- Loki (可选，用于日志) ----------
+  # - name: Loki
+  #   type: loki
+  #   access: proxy
+  #   url: http://loki:3100
+  #   editable: true
+  #   version: 1
+
+  # ---------- Jaeger (可选，用于追踪) ----------
+  # - name: Jaeger
+  #   type: jaeger
+  #   access: proxy
+  #   url: http://jaeger-query:16686
+  #   editable: true
+  #   version: 1
+
+  # ---------- PostgreSQL (可选，用于业务数据) ----------
+  # - name: PostgreSQL
+  #   type: postgres
+  #   access: proxy
+  #   url: postgres:5432
+  #   database: agentdb
+  #   user: agent
+  #   jsonData:
+  #     sslmode: disable
+  #   version: 1

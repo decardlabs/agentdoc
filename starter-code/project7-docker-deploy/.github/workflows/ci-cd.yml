@@ -1,0 +1,194 @@
+# ============================================================
+# CI/CD Pipeline - 测试、构建、部署一体化
+# 用途：自动化测试、构建镜像、部署到服务器
+# 触发条件：
+#   - push 到 main/develop 分支
+#   - 创建 tag（v*）
+#   - 提交 Pull Request 到 main 分支
+# ============================================================
+
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+    tags: ['v*']
+  pull_request:
+    branches: [main]
+
+# 取消同一 PR 的重复运行
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DOCKER_IMAGE: ${{ secrets.DOCKER_USERNAME }}/multi-agent
+  ALIYUN_REGISTRY: registry.cn-hangzhou.aliyuncs.com
+
+jobs:
+  # ============ Job 1: 测试 ============
+  test:
+    name: 单元测试 + 代码检查
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 设置 Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: 安装依赖
+        run: |
+          pip install -r requirements.txt
+          pip install pytest pytest-cov pytest-asyncio
+          pip install flake8 black isort
+
+      - name: 代码格式检查
+        run: |
+          flake8 src/ --max-line-length=120 --statistics
+          black --check src/
+          isort --check-only src/
+
+      - name: 运行测试
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          DATABASE_URL: sqlite:///./test.db
+        run: |
+          pytest tests/ \
+            --cov=src/ --cov-report=term-missing --cov-report=xml \
+            --cov-fail-under=70 -v
+
+      - name: 上传覆盖率报告
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./coverage.xml
+        continue-on-error: true
+
+  # ============ Job 2: 构建并推送镜像 ============
+  build-and-push:
+    name: 构建并推送镜像
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+    permissions:
+      contents: read
+      packages: write
+    
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 设置 Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: 登录 Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: 登录阿里云 ACR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.ALIYUN_REGISTRY }}
+          username: ${{ secrets.ALIYUN_USERNAME }}
+          password: ${{ secrets.ALIYUN_PASSWORD }}
+        continue-on-error: true
+
+      - name: 提取标签
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.DOCKER_IMAGE }}
+          tags: |
+            type=semver,pattern={{version}}
+            type=sha,prefix=
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: 构建并推送
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          platforms: linux/amd64,linux/arm64
+          tags: ${{ steps.meta.outputs.tags }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: 镜像安全扫描 (Trivy)
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ env.DOCKER_IMAGE }}:latest
+          format: 'table'
+          exit-code: '0'
+          ignore-unfixed: true
+          severity: 'CRITICAL,HIGH'
+
+  # ============ Job 3: 部署到服务器 ============
+  deploy:
+    name: 部署到生产服务器
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    environment: production
+    
+    steps:
+      - name: SSH 部署
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            set -e
+            
+            # 进入项目目录
+            cd /opt/multi-agent
+            
+            # 拉取最新镜像
+            docker compose pull
+            
+            # 启动服务
+            docker compose up -d --remove-orphans
+            
+            # 等待服务启动
+            sleep 10
+            
+            # 检查服务状态
+            docker compose ps
+            
+            # 检查是否有不健康的服务
+            if docker compose ps | grep -q "unhealthy"; then
+              echo "!!! 服务不健康 !!!"
+              exit 1
+            fi
+            
+            # 清理旧镜像
+            docker image prune -f
+            docker system prune -f
+
+      - name: 冒烟测试
+        run: |
+          sleep 15
+          
+          # 检查健康检查端点
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" \
+            "http://${{ secrets.SERVER_HOST }}/health" || echo "000")
+          
+          if [ "$HTTP_CODE" != "200" ]; then
+            echo "健康检查失败 (HTTP $HTTP_CODE)"
+            exit 1
+          fi
+          
+          echo "冒烟测试通过 (HTTP $HTTP_CODE)"
+
+      - name: 部署成功通知
+        if: success()
+        run: |
+          echo "部署成功！"
+          # 这里可以添加钉钉/飞书通知
+          # curl -X POST ${{ secrets.DINGTALK_WEBHOOK }} -d "..."
