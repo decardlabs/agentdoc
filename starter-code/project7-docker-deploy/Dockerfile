@@ -65,7 +65,6 @@ RUN groupadd -r appuser && \
 # 复制应用代码
 # --chown=appuser:appuser: 设置文件所有者为 appuser
 COPY --chown=appuser:appuser src/ ./src/
-COPY --chown=appuser:appuser pyproject.toml ./
 
 # 设置环境变量
 # TZ: 时区设置为上海

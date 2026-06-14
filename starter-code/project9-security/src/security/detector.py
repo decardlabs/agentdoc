@@ -4,7 +4,7 @@ Prompt 注入检测器 - 智能体工程师培养计划 项目 9
 """
 
 from typing import Dict, List, Optional, Tuple
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import Enum
 import re
 import json
@@ -31,7 +31,7 @@ class DetectionResult:
     category: str              # "指令覆盖" | "角色劫持" | "越狱" | "信息窃取" | "正常"
     layer: str                # "keyword" | "llm" | "encoding"
     reason: str
-    matched_patterns: List[str] = None
+    matched_patterns: List[str] = field(default_factory=list)
 
 # ============================================================
 # 注入检测器

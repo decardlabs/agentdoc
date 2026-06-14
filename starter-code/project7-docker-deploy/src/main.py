@@ -9,7 +9,7 @@ from pydantic import BaseModel
 from typing import Optional, List, Dict
 import uvicorn
 import logging
-import time
+import asyncio
 import os
 from datetime import datetime
 
@@ -110,7 +110,7 @@ async def chat(request: ChatRequest):
         logger.info(f"Received chat request with {len(request.messages)} messages")
         
         # 模拟 LLM 调用延迟
-        time.sleep(0.5)
+        await asyncio.sleep(0.5)
         
         # 构造模拟响应
         response_message = f"这是一个模拟回复。您发送了 {len(request.messages)} 条消息。实际部署时应调用 OpenAI API。"

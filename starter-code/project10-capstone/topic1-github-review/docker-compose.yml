@@ -10,7 +10,7 @@ services:
     container_name: github-review-agent
     restart: unless-stopped
     ports:
-      - "${APP_PORT:-8000}:8000"
+      - "${APP_PORT:-8001}:8000"
     env_file:
       - .env
     environment:

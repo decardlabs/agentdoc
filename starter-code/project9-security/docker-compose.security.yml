@@ -65,7 +65,7 @@ services:
   test-runner:
     build:
       context: .
-      dockerfile: Dockerfile.test
+      dockerfile: Dockerfile
     image: secure-agent-test:v1.0
     container_name: secure-agent-test
     restart: "no"

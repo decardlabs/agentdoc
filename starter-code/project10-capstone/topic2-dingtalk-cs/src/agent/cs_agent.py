@@ -166,10 +166,10 @@ class CustomerServiceAgent:
 """
 
         try:
-            import openai
-            openai.api_key = self.openai_api_key
-
-            response = openai.chat.completions.create(
+            from openai import OpenAI
+            client = OpenAI(api_key=self.openai_api_key)
+            
+            response = client.chat.completions.create(
                 model=self.llm_model,
                 messages=[
                     {"role": "system", "content": "你是意图识别专家。"},
@@ -247,10 +247,10 @@ class CustomerServiceAgent:
 """
 
         try:
-            import openai
-            openai.api_key = self.openai_api_key
-
-            response = openai.chat.completions.create(
+            from openai import OpenAI
+            client = OpenAI(api_key=self.openai_api_key)
+            
+            response = client.chat.completions.create(
                 model=self.llm_model,
                 messages=[
                     {"role": "system", "content": "你是专业、友好的智能客服助手。"},
@@ -282,10 +282,10 @@ class CustomerServiceAgent:
 """
 
         try:
-            import openai
-            openai.api_key = self.openai_api_key
-
-            response = openai.chat.completions.create(
+            from openai import OpenAI
+            client = OpenAI(api_key=self.openai_api_key)
+            
+            response = client.chat.completions.create(
                 model=self.llm_model,
                 messages=[
                     {"role": "system", "content": "你是专业、友好的智能客服助手。"},

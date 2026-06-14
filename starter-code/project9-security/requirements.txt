@@ -28,7 +28,7 @@ cryptography==42.0.0
 
 # =========== 数据库 ============
 sqlalchemy==2.0.23
-sqlite3  # 内置，无需安装
+# sqlite3 是 Python 内置模块，无需安装
 
 # =========== 监控 ============
 prometheus-client==0.19.0
