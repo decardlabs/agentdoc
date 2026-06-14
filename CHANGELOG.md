@@ -5,6 +5,31 @@
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，
 版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/) 规范。
 
+## [0.1.1] - 2026-06-15
+
+### 新增
+
+- 新增 `代码脚手架总结.md`
+  - 10 个项目的完整目录结构
+  - 核心代码模板（FastAPI、LangGraph、Dockerfile 等）
+  - 初始化脚本（`setup.sh`、`init_db.sql`）
+  - 攻击 Payload 库示例
+  - 快速启动指南
+
+### 修复
+
+- 修复项目 3 架构建议书中 OpenAI 响应属性错误（`resp.content` → `resp.choices[0].message.content`）
+- 修复项目 4 架构建议书中 FastAPI 流式调用错误（`app.astream()` → 正确用法）
+- 修复项目 9 架构建议书中 SQL 语法（MySQL → PostgreSQL）
+- 清理项目 3、6 讲解说明末尾的 AI 生成残留
+
+### 优化
+
+- 统一项目难度星级标识（★☆☆☆☆ → ★★☆☆☆）
+- 项目 10 README 添加"毕业设计"标签
+- 附录添加交叉引用链接
+- 主 README 添加"附录"快捷目录
+
 ## [0.1.0] - 2026-06-14
 
 ### 新增
