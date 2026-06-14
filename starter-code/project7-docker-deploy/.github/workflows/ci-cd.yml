@@ -162,8 +162,9 @@ jobs:
             docker compose ps
             
             # 检查是否有不健康的服务
-            if docker compose ps | grep -q "unhealthy"; then
+            if docker compose ps --format json | jq -r 'select(.Health !="healthy" and .Health !="") | .Service' | grep -q .; then
               echo "!!! 服务不健康 !!!"
+              docker compose ps
               exit 1
             fi
             

@@ -126,9 +126,13 @@ async def chat(request: ChatRequest):
             latency_ms=latency_ms
         )
         
-    except Exception as e:
-        logger.error(f"Chat request failed: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
+        except Exception as e:
+            logger.error(f"Chat request failed: {str(e)}")
+            # 生产环境不暴露内部错误信息
+            if os.getenv("ENVIRONMENT", "development") == "production":
+                raise HTTPException(status_code=500, detail="Internal server error")
+            else:
+                raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/api/v1/models")
 async def list_models():

@@ -74,8 +74,10 @@ load_env() {
         fi
     fi
     
-    # 加载环境变量
-    export $(grep -v '^#' "$ENV_FILE" | xargs)
+    # 加载环境变量（安全方式）
+    set -a
+    source "$ENV_FILE"
+    set +a
     
     log_info "环境变量加载完成"
 }

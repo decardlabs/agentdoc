@@ -27,7 +27,7 @@ scrape_configs:
     scrape_interval: 5s            # 更频繁的抓取
     static_configs:
       - targets:
-          - "host.docker.internal:8001"   # Agent 服务的 metrics 端口
+          - "agent:8001"   # Agent 服务的 metrics 端口（Docker 网络内使用服务名）
     metrics_path: /metrics
     scrape_timeout: 5s
 

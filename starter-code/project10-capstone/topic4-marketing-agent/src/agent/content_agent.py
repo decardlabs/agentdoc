@@ -296,20 +296,50 @@ class ContentAgent:
     def _parse_generated(self, generated: str, content_type: str) -> Dict[str, Any]:
         """解析生成的内容"""
         try:
+            # 更健壮的 JSON 提取
+            # 方法1：使用正则匹配完整的 JSON 对象
+            import re
+            json_pattern = r'\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}'
+            matches = re.findall(json_pattern, generated, re.DOTALL)
+            
+            if matches:
+                # 尝试解析找到的最后一个完整 JSON
+                for json_str in reversed(matches):
+                    try:
+                        result = json.loads(json_str)
+                        return {
+                            "content": result.get("content", generated),
+                            "title": result.get("title"),
+                            "hashtags": result.get("hashtags", []),
+                            "seo_keywords": result.get("seo_keywords", [])
+                        }
+                    except json.JSONDecodeError:
+                        continue
+            
+            # 方法2：简单的括号匹配（备用）
             json_start = generated.find("{")
-            json_end = generated.rfind("}") + 1
-
-            if json_start >= 0 and json_end > json_start:
-                json_str = generated[json_start:json_end]
-                result = json.loads(json_str)
-
-                return {
-                    "content": result.get("content", generated),
-                    "title": result.get("title"),
-                    "hashtags": result.get("hashtags", []),
-                    "seo_keywords": result.get("seo_keywords", [])
-                }
-
+            if json_start >= 0:
+                # 找到匹配的 closing brace
+                depth = 0
+                for i, char in enumerate(generated[json_start:], json_start):
+                    if char == '{':
+                        depth += 1
+                    elif char == '}':
+                        depth -= 1
+                        if depth == 0:
+                            json_str = generated[json_start:i+1]
+                            try:
+                                result = json.loads(json_str)
+                                return {
+                                    "content": result.get("content", generated),
+                                    "title": result.get("title"),
+                                    "hashtags": result.get("hashtags", []),
+                                    "seo_keywords": result.get("seo_keywords", [])
+                                }
+                            except json.JSONDecodeError:
+                                break
+            
+            # 都没成功，返回原始内容
             return {
                 "content": generated,
                 "title": None,
