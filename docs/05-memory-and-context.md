@@ -203,8 +203,7 @@ memory = UserMemory("alice")
 memory.add("Prefers metric units.")
 memory.add("Works in Tokyo timezone (JST).")
 
-system_prompt = f"""You are a helpful assistant.
-{memory.as_prompt_text()}"""
+system_prompt = f"You are a helpful assistant.\n{memory.as_prompt_text()}"
 ```
 
 ### Episodic memory with a vector store

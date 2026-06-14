@@ -291,19 +291,19 @@ Never let a tool block the agent indefinitely:
 import signal
 
 
-class TimeoutError(Exception):
+class ToolTimeoutError(Exception):
     pass
 
 
 def run_with_timeout(fn, args: dict, timeout_seconds: int = 30) -> str:
     def handler(signum, frame):
-        raise TimeoutError(f"Tool timed out after {timeout_seconds}s")
+        raise ToolTimeoutError(f"Tool timed out after {timeout_seconds}s")
 
     signal.signal(signal.SIGALRM, handler)
     signal.alarm(timeout_seconds)
     try:
         return fn(**args)
-    except TimeoutError as e:
+    except ToolTimeoutError as e:
         return str(e)
     finally:
         signal.alarm(0)
@@ -346,7 +346,7 @@ Instructions:
 1. Always use the search_knowledge_base tool before answering.
 2. Cite the source document in your final answer.
 3. Keep responses under 200 words.
-4. If the user seems frustrated, apologise and escalate.
+4. If the user seems frustrated, apologize and escalate.
 ```
 
 ### Test your prompt under adversarial conditions
