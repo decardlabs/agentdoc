@@ -121,7 +121,7 @@ async def chat(request: ChatRequest):
         "next_action": "chat",
     }
 
-    final_state = app_graph.invoke(initial_state)
+    final_state = await app_graph.ainvoke(initial_state)
     ai_reply = final_state["messages"][-1].content
 
     return ChatResponse(

@@ -108,6 +108,17 @@ def generate_response(state: AgentState, llm: ChatOpenAI, short_term_mem: ShortT
     short_term_mem.add_message(user_id, session_id, state["messages"][-2])  # 用户消息
     short_term_mem.add_message(user_id, session_id, response)  # AI 回复
 
+    # 决定下一步动作：每 10 轮触发一次摘要；含个人信息时更新画像
+    msg_count = len(state["messages"])
+    last_user_msg = state["messages"][-2].content if len(state["messages"]) >= 2 else ""
+    personal_keywords = ["我叫", "我是", "我的", "我叫", "my name is", "i am", "i'm"]
+    if any(kw in last_user_msg.lower() for kw in personal_keywords):
+        state["next_action"] = "update_profile"
+    elif msg_count > 0 and msg_count % 20 == 0:
+        state["next_action"] = "summarize"
+    else:
+        state["next_action"] = "chat"
+
     return state
 
 

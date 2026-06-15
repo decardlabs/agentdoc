@@ -15,7 +15,7 @@ E2B 是一个安全的云端代码执行环境，支持：
 
 import os
 import logging
-from typing import Optional, list
+from typing import Optional, List
 from pathlib import Path
 
 logger = logging.getLogger(__name__)
@@ -70,11 +70,20 @@ class E2BSandboxManager:
         from e2b import Sandbox
 
         logger.info(f"创建 E2B 沙箱，模板={self.template}，超时={self.timeout}s")
-        self.sandbox = Sandbox(
-            api_key=self.api_key,
-            template=self.template,
-            timeout=self.timeout,
-        )
+        # 兼容 e2b SDK 1.x：使用 Sandbox.create() 工厂方法
+        try:
+            self.sandbox = Sandbox.create(
+                api_key=self.api_key,
+                template=self.template,
+                timeout=self.timeout,
+            )
+        except (AttributeError, TypeError):
+            # 回退到 0.x 旧版 API
+            self.sandbox = Sandbox(
+                api_key=self.api_key,
+                template=self.template,
+                timeout=self.timeout,
+            )
 
         # 确保输出目录存在
         self.sandbox.files.make_dir("/home/user/output")

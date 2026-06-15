@@ -10,11 +10,11 @@
 import os
 import json
 import logging
-from typing import TypedDict, Annotated, Sequence, Literal, Optional
+from typing import Sequence, Literal, Optional
+from typing_extensions import TypedDict, Annotated
 from langchain_core.messages import BaseMessage, HumanMessage, AIMessage, SystemMessage
 from langchain_openai import ChatOpenAI
 from langgraph.graph import StateGraph, END
-from langgraph.checkpoint.sqlite import SqliteSaver
 
 from src.agents.researcher import ResearcherAgent
 from src.agents.writer import WriterAgent
@@ -178,17 +178,18 @@ class MultiAgentOrchestrator:
         graph.add_edge("revise", "reviewer")
 
         # 批评者 → 条件分支
-        if self.enable_human_review:
-            graph.add_conditional_edges(
-                "critic",
-                self._route_after_critic,
-                {
-                    "human_review": "human_review",
-                    "publish": "publish",
-                }
-            )
-        else:
-            graph.add_edge("critic", "publish")
+        if self.enable_critic:
+            if self.enable_human_review:
+                graph.add_conditional_edges(
+                    "critic",
+                    self._route_after_critic,
+                    {
+                        "human_review": "human_review",
+                        "publish": "publish",
+                    }
+                )
+            else:
+                graph.add_edge("critic", "publish")
 
         # 人工审核 → 条件分支
         if self.enable_human_review:
