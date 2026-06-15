@@ -71,10 +71,10 @@ class ContentAgent:
         )
 
         try:
-            import openai
-            openai.api_key = self.openai_api_key
+            from openai import OpenAI
+            client = OpenAI(api_key=self.openai_api_key)
 
-            response = openai.chat.completions.create(
+            response = client.chat.completions.create(
                 model=self.llm_model,
                 messages=[
                     {"role": "system", "content": "你是专业的营销内容创作专家。"},
@@ -137,10 +137,10 @@ class ContentAgent:
 """
 
         try:
-            import openai
-            openai.api_key = self.openai_api_key
+            from openai import OpenAI
+            client = OpenAI(api_key=self.openai_api_key)
 
-            response = openai.chat.completions.create(
+            response = client.chat.completions.create(
                 model=self.llm_model,
                 messages=[
                     {"role": "system", "content": "你是内容优化专家。"},
@@ -181,10 +181,10 @@ class ContentAgent:
         logger.info(f"生成配图: prompt={prompt[:50]}...")
 
         try:
-            import openai
-            openai.api_key = self.openai_api_key
+            from openai import OpenAI
+            client = OpenAI(api_key=self.openai_api_key)
 
-            response = openai.images.generate(
+            response = client.images.generate(
                 model="dall-e-3",
                 prompt=prompt,
                 size="1024x1024",

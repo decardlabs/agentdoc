@@ -165,11 +165,10 @@ class ReviewAgent:
 """
 
         try:
-            import openai
+            from openai import OpenAI
+            client = OpenAI(api_key=self.openai_api_key)
 
-            openai.api_key = self.openai_api_key
-
-            response = openai.chat.completions.create(
+            response = client.chat.completions.create(
                 model=self.llm_model,
                 messages=[
                     {"role": "system", "content": "你是高级代码审查工程师，擅长发现代码中的问题。"},

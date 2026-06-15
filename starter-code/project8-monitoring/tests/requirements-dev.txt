@@ -1,0 +1,8 @@
+# Project 8 测试依赖
+#
+# 本项目 P0 修复回归测试（tests/test_p0_fixes.py）使用标准库 unittest，
+# 无需安装额外依赖即可运行。
+#
+# 运行方式：
+#   cd project8-monitoring
+#   python -m unittest tests.test_p0_fixes -v

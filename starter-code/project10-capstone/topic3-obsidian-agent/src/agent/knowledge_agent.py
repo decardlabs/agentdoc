@@ -136,10 +136,10 @@ class KnowledgeAgent:
 """
 
         try:
-            import openai
-            openai.api_key = self.openai_api_key
+            from openai import OpenAI
+            client = OpenAI(api_key=self.openai_api_key)
 
-            response = openai.chat.completions.create(
+            response = client.chat.completions.create(
                 model=self.llm_model,
                 messages=[
                     {"role": "system", "content": "你是知识库助手，基于提供的上下文回答问题。"},
@@ -194,10 +194,10 @@ class KnowledgeAgent:
 """
 
         try:
-            import openai
-            openai.api_key = self.openai_api_key
+            from openai import OpenAI
+            client = OpenAI(api_key=self.openai_api_key)
 
-            response = openai.chat.completions.create(
+            response = client.chat.completions.create(
                 model=self.llm_model,
                 messages=[
                     {"role": "system", "content": "你是笔记总结助手。"},

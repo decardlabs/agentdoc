@@ -1,0 +1,11 @@
+# Project 4 测试依赖
+#
+# 本项目 P0 修复回归测试（tests/test_p0_fixes.py）使用标准库 unittest，
+# 无需安装额外依赖即可运行。
+#
+# 运行方式：
+#   cd project4-memory-agent
+#   python -m unittest tests.test_p0_fixes -v
+#
+# 现有 tests/test_memory.py 依赖 Redis + Chroma 服务，需另装：
+#   pip install -r ../project4-memory-agent/requirements.txt

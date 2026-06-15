@@ -235,6 +235,6 @@ async def get_long_term(user_id: str, query: str = "", top_k: int = 3):
 
 if __name__ == "__main__":
     host = os.getenv("API_HOST", "0.0.0.0")
-    port = int(os.getenv("API_PORT", "8000"))
+    port = int(os.getenv("API_PORT", "8080"))
     logger.info(f"启动 API 服务，地址 http://{host}:{port}")
     uvicorn.run(app, host=host, port=port)
