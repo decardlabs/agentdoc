@@ -1,0 +1,12 @@
+# 回归测试附加依赖
+
+仅在运行 `tests/test_p0_fixes.py` 时需要。
+
+# 标准库已包含 unittest 和 unittest.mock，无需安装
+# 本文件保留作为"显式声明测试不需要额外依赖"的标记
+
+# 如果学生在已安装 requirements.txt 的环境下运行，可直接：
+#   python -m unittest tests.test_p0_fixes -v
+#
+# 如果在无依赖环境运行（CI 早期检查），test_p0_fixes.py 会自动 mock
+# 所有外部依赖（openai、langgraph、requests 等），依然可以运行。
