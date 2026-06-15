@@ -120,24 +120,31 @@ class RAGPipeline:
             logger.error(f"Embedding 模型初始化失败: {str(e)}")
             raise
     
-    def index_documents(self, data_dir: str, chunk_size: int = 512) -> None:
+    def index_documents(
+        self,
+        data_dir: str,
+        chunk_size: int = 512,
+        chunk_overlap: int = 50
+    ) -> None:
         """
         索引文档（离线阶段）
-        
+
         Args:
             data_dir: 文档目录
             chunk_size: Chunk 大小（字符数）
+            chunk_overlap: 相邻 chunk 重叠字符数（避免上下文断裂）
         """
         try:
             logger.info(f"开始索引文档: {data_dir}")
-            
+
             # 1. 加载文档
             documents = self.document_loader.load_directory(data_dir)
             logger.info(f"加载了 {len(documents)} 个文档片段")
-            
-            # 2. 切分文档（简化版：按字符切分）
-            # 注意：实际应该使用 LangChain 的 TextSplitter
-            chunks = self._split_documents(documents, chunk_size)
+
+            # 2. 切分文档（滑动窗口：相邻 chunk 重叠 chunk_overlap 个字符）
+            # 实际工程建议：使用 LangChain 的 RecursiveCharacterTextSplitter，
+            # 它会优先按段落/句子边界切分，比纯字符切分更优。
+            chunks = self._split_documents(documents, chunk_size, chunk_overlap)
             logger.info(f"切分后得到 {len(chunks)} 个 Chunks")
             
             # 3. 生成向量
@@ -156,36 +163,49 @@ class RAGPipeline:
     def _split_documents(
         self,
         documents: List[Dict[str, Any]],
-        chunk_size: int = 512
+        chunk_size: int = 512,
+        chunk_overlap: int = 50
     ) -> List[Dict[str, Any]]:
         """
-        切分文档（简化版）
-        
+        切分文档
+
+        使用滑动窗口（带 overlap）切分，避免句子在 chunk 边界被切断。
+
         Args:
             documents: 文档列表
-            chunk_size: Chunk 大小
-            
+            chunk_size: Chunk 大小（字符数）
+            chunk_overlap: 相邻 chunk 的重叠字符数，避免上下文断裂
+
         Returns:
             Chunks 列表
         """
+        if chunk_overlap >= chunk_size:
+            raise ValueError(
+                f"chunk_overlap ({chunk_overlap}) 必须小于 chunk_size ({chunk_size})"
+            )
+
         chunks = []
-        
+        stride = chunk_size - chunk_overlap
+
         for doc in documents:
             text = doc["text"]
-            
-            # 按字符数切分
-            for i in range(0, len(text), chunk_size):
+
+            # 滑动窗口切分：每个 chunk 与前一个重叠 chunk_overlap 个字符
+            for i in range(0, len(text), stride):
                 chunk_text = text[i:i + chunk_size]
-                
+                if not chunk_text.strip():
+                    continue
+
                 # 复制元数据
                 chunk_metadata = doc["metadata"].copy()
                 chunk_metadata["chunk_id"] = len(chunks)
-                
+                chunk_metadata["chunk_start"] = i
+
                 chunks.append({
                     "text": chunk_text,
                     "metadata": chunk_metadata
                 })
-        
+
         return chunks
     
     def query(self, question: str, top_k: int = 5) -> str:
